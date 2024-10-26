@@ -48,4 +48,13 @@ class Grammar:
         return 'S' in T[0][n - 1]
     #Este método se encarga de verificar si la gramática ingresada es válida
     def is_valid(self):
-        pass
+        # Verificar si el simbolo inicial esta en los no terminales
+        is_initial_valid = True if self.initial_symbol in self.non_terminals else False
+
+        # Verificar que las producciones sean validas
+        is_productions_valid = all(
+                lhs in self.non_terminals and
+                all(all(symbol in self.non_terminals + self.terminals for symbol in rhs) for rhs in rules)
+                for lhs, rules in self.productions.items()
+                )
+        return is_initial_valid and is_productions_valid
