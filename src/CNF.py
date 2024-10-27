@@ -30,8 +30,26 @@ def find_epsilon_productions(grammar):
                 epsilon_productions.add(lhs)
     return epsilon_productions
 
-def delete_epsilon_productions():
-    pass
+def delete_epsilon_productions(grammar):
+    epsilon_productions = find_epsilon_productions(grammar)
+
+    if not epsilon_productions:
+        return
+
+    new_productions = {}
+
+    for lhs, rules in grammar.productions.items():
+        new_productions[lhs] = []
+        for rhs in rules:
+            new_productions[lhs].append(rhs)
+
+            if lhs in epsilon_productions:
+                new_rhs = rhs.copy()
+                if new_rhs:
+                    new_rhs.remove(lhs)
+                    if new_rhs:
+                        new_productions[lhs].append(new_rhs)
+    grammar.productions = new_productions
 
 def find_non_binarized_expressions():
     pass
