@@ -1,12 +1,38 @@
-import numpy as np
+from CNF import convert_to_cnf
+from Grammar import Grammar
 
-def main():
-    list1 = [1, 2, 3, 4]
-    list2 = [5, 6, 7, 8]
+# Define la gramática
+terminals = ["cooks", "drinks", "eats", "cuts", "in", "with", "he", "she", "cat", "dog", "beer", "cake", "juice", "meat", "soup", "fork", "knife", "oven", "spoon", "a", "the"]
+non_terminals = ["S", "VP", "PP", "NP", "V", "P", "N", "Det"]
+initial_symbol = "S"
+productions = {
+    "S": [["NP", "VP"]],
+    "VP": [["VP", "PP"], ["V", "NP"], ["cooks"], ["drinks"], ["eats"], ["cuts"]],
+    "PP": [["P", "NP"]],
+    "NP": [["Det", "N"], ["he"], ["she"]],
+    "V": [["cooks"], ["drinks"], ["eats"], ["cuts"]],
+    "P": [["in"], ["with"]],
+    "N": [["cat"], ["dog"], ["beer"], ["cake"], ["juice"], ["meat"], ["soup"], ["fork"], ["knife"], ["oven"], ["spoon"]],
+    "Det": [["a"], ["the"]]
+}
 
-    array = np.array([list1, list2])
+# Crea la gramática y conviértela a CNF
+grammar = Grammar(terminals, non_terminals, initial_symbol, productions)
+convert_to_cnf(grammar)  # Convierte la gramática a CNF
 
-    print(array)
+# Pruebas de frases aceptadas y no aceptadas
+phrases = [
+    ("he eats a cake", True),  # Debería ser aceptada
+    ("the dog drinks the juice", True),  # Debería ser aceptada
+    ("she cake drinks", False),  # No debería ser aceptada
+    ("cat a the", False)  # No debería ser aceptada
+]
 
-if __name__ == "__main__":
-    main()
+# Ejecuta el algoritmo CYK en cada frase
+for phrase, expected in phrases:
+    input_string = phrase.split()
+    result, tree, exec_time = grammar.cyk_parse(input_string)
+    print(f"Phrase: '{phrase}' - Expected: {'Accepted' if expected else 'Rejected'}, Result: {'Accepted' if result else 'Rejected'}")
+    if result:
+        print("Parse Tree:", tree)
+    print(f"Execution Time: {exec_time:.6f} seconds\n")
