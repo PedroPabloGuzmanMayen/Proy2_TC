@@ -1,4 +1,4 @@
-from Grammar import Grammar
+from src.Grammar import Grammar
 
 '''
 Esta función debe eliminar el simbolo inicial (solo si es necesario) en las producciones

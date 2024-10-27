@@ -1,4 +1,5 @@
 import time  # Importar la biblioteca time para medir el tiempo
+import json
 
 class Grammar:
     def __init__(self, terminals, non_terminals, initial_symbol, productions):

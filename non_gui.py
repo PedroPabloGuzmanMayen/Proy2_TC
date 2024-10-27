@@ -1,5 +1,5 @@
-from CNF import convert_to_cnf
-from Grammar import Grammar
+from src.CNF import convert_to_cnf
+from src.Grammar import Grammar
 
 # Define la gramática
 terminals = ["cooks", "drinks", "eats", "cuts", "in", "with", "he", "she", "cat", "dog", "beer", "cake", "juice", "meat", "soup", "fork", "knife", "oven", "spoon", "a", "the"]
