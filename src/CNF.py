@@ -21,8 +21,14 @@ def eliminate_start_symbol(grammar):
 '''
 Esta funcion buscara producciones que puedan derivar en la cadena vacia
 '''
-def find_epsilon_productions():
-    pass
+def find_epsilon_productions(grammar):
+    epsilon_productions = set()
+    # Para cada produccion se verifica si alguna es vacia
+    for lhs, rules in grammar.productions.items():
+        for rhs in rules:
+            if not rhs:
+                epsilon_productions.add(lhs)
+    return epsilon_productions
 
 def delete_epsilon_productions():
     pass
