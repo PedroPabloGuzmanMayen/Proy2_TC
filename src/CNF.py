@@ -51,10 +51,25 @@ def delete_epsilon_productions(grammar):
                         new_productions[lhs].append(new_rhs)
     grammar.productions = new_productions
 
-def find_non_binarized_expressions():
-    pass
-def binarize_expression():
-    pass
+def find_non_binarized_expressions(grammar):
+    non_binarized = []
+
+    for lhs, rules in grammar.productions.items():
+        for rhs in rules:
+            if len(rhs) > 2:
+                non_binarized.append((lhs,rhs))
+    return non_binarized
+
+def binarize_expression(grammar):
+    non_binarized = find_non_binarized_expressions(grammar)
+
+    for lhs, rhs in grammar.productions.items():
+        while len(rhs) > 2:
+            new_non_terminal = f"{lhs}_1"
+            grammar.non_terminals.append(new_non_terminal)
+            grammar.productions[new_non_terminal] = [rhs[1:]]
+            rhs = [rhs[0], new_non_terminal]
+        grammar.productions[lhs] = [rhs]
 
 def find_null_productions():
     pass
