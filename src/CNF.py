@@ -1,4 +1,5 @@
 from Grammar import Grammar
+import re
 
 '''
 esta función se encarga de hallar apariciones de una variable en las producciones de la gramática
@@ -22,6 +23,7 @@ Esta función debe eliminar el simbolo inicial (solo si es necesario) en las pro
 '''
 def eliminate_start_symbol(grammar):
     new_initial_symbol = "S0"
+    grammar.non_terminals.insert(0, "S0")
     grammar.productions[new_initial_symbol] = [[grammar.initial_symbol]]  # Agregar la producción S0 -> S
     grammar.initial_symbol = new_initial_symbol  # Cambiar el valor del símbolo inicial de la gramática. 
 
@@ -75,9 +77,27 @@ def find_non_binarized_expressions(grammar):
 
     for lhs, rules in grammar.productions.items():
         for rhs in rules:
-            if len(rhs) > 2:
+            if len(rhs) > 2 :
                 non_binarized.append((lhs,rhs))
     return non_binarized
+
+def replace_terminals(grammar):
+    record = {}
+    #Crear nuevas producciones para cada terminal
+    for terminal in grammar.terminals:
+        record[terminal] = "X" + terminal
+        grammar.productions["X" + terminal] = [[terminal]]
+
+    for production in grammar.productions:
+        for rule in grammar.productions[production] :
+            if len(rule) > 1:
+                intersect = set(rule).intersection(set(record))
+                if len(intersect) != 0:
+                    old_list = grammar.productions[production].pop(grammar.productions[production].index(rule))
+                    value = intersect.pop()
+                    new_list = list(map(lambda x: record[value] if x == value else x, old_list ))
+                    grammar.productions[production].append(new_list)
+    
 '''
 Esta funcion convierte producciones no binarizadas en producciones binarias
 '''
@@ -178,10 +198,10 @@ non_terminals = ["S", "VP", "PP", "NP", "V", "P", "N", "Det"]
 initial_symbol = "S"
 productions = {
     "S": [["NP", "VP"], ["ε"]],
-    "VP": [["VP", "PP"], ["V", "NP"], ["cooks"], ["drinks"], ["eats"], ["cuts"]],
+    "VP": [["VP", "PP"], ["V", "NP"], ["cooks"], ["drinks"], ["eats"], ["cuts"], ["cuts", "VP"]],
     "PP": [["P", "NP"], ["Det"]],
     "NP": [["Det", "N"], ["he"], ["she"]],
-    "V": [["cooks"], ["drinks"], ["eats"], ["cuts"]],
+    "V": [["cooks", "drinks"], ["drinks"], ["eats"], ["cuts"]],
     "P": [["in"], ["with"]],
     "N": [["cat"], ["dog"], ["beer"], ["cake"], ["juice"], ["meat"], ["soup"], ["fork"], ["knife"], ["oven"], ["spoon"]],
     "Det": [["a"], ["the"]]
@@ -189,9 +209,19 @@ productions = {
 
 grammar = Grammar(terminals, non_terminals, initial_symbol, productions)
 
+print(find_non_binarized_expressions(grammar))
 
 
 delete_epsilon_productions(grammar)
 
-for i in grammar.productions:
-    print(grammar.productions[i])
+replace_terminals(grammar)
+
+myList = [[1], [2]]
+
+element = myList.pop(myList.index([1]))
+
+print(element)
+
+for i, j in grammar.productions.items():
+    print(i, j)
+
