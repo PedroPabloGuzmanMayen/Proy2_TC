@@ -1,8 +1,6 @@
 import customtkinter as ctk
 from .color_theme import get_palette
-from src.Grammar import Grammar
-from src.CNF import convert_to_cnf  # Asegúrate de importar la función de conversión
-import time
+from src.CNF import convert_to_cnf  # Importa la función de conversión completa
 
 class GrammarApp(ctk.CTk):
     def __init__(self, grammar):
@@ -43,7 +41,6 @@ class GrammarApp(ctk.CTk):
         self.output_text = ctk.CTkTextbox(self.right_frame, width=450, height=200)
         self.output_text.grid(row=1, column=0, padx=10, pady=10)
 
-        # Configura el layout de la ventana
         self.columnconfigure(1, weight=1)
         self.rowconfigure(0, weight=1)
         self.left_frame.rowconfigure(0, weight=1)
@@ -54,31 +51,35 @@ class GrammarApp(ctk.CTk):
         self.update_theme()
 
     def update_theme(self):
+        """Aplica los colores del tema seleccionado a los elementos de la GUI."""
         self.colors = get_palette()
         self.configure(bg_color=self.colors["base"])
 
         self.left_frame.configure(fg_color=self.colors["base"])
         self.right_frame.configure(fg_color=self.colors["surface1"])
-        self.theme_button.configure(fg_color=self.colors["overlay1"], text_color=self.colors["text"])
+        self.theme_button.configure(fg_color=self.colors["overlay1"], text_color=self.colors["crust"])
         self.label.configure(text_color=self.colors["text"])
         self.input_label.configure(text_color=self.colors["text"])
-        self.input_entry.configure(fg_color=self.colors["surface0"], text_color=self.colors["text"])
+        self.input_entry.configure(fg_color=self.colors["surface0"], text_color=self.colors["crust"])
         self.cnf_button.configure(fg_color=self.colors["sapphire"], text_color=self.colors["crust"])
         self.cyk_button.configure(fg_color=self.colors["lavender"], text_color=self.colors["crust"])
         self.output_label.configure(text_color=self.colors["crust"])
-        self.output_text.configure(fg_color=self.colors["surface0"], text_color=self.colors["text"])
+        self.output_text.configure(fg_color=self.colors["surface0"], text_color=self.colors["crust"])
         self.update_idletasks() 
 
     def toggle_theme(self):
+        """Alterna entre temas claro y oscuro."""
         ctk.set_appearance_mode("Light" if ctk.get_appearance_mode() == "Dark" else "Dark")
         self.update_theme()
 
     def convert_to_cnf(self):
+        """Convierte la gramática actual a CNF y muestra el resultado."""
         convert_to_cnf(self.grammar)
         self.output_text.delete("1.0", "end")
         self.output_text.insert("1.0", f"Gramática convertida a CNF:\n{self.grammar.to_json()}")
 
     def run_cyk(self):
+        """Ejecuta el algoritmo CYK en la cadena proporcionada."""
         input_string = self.input_entry.get().strip().split()
         if not input_string:
             self.output_text.insert("1.0", "Por favor, ingresa una cadena.")
