@@ -122,7 +122,7 @@ def binarize_expression(grammar):
     while not is_binarized:
         for expression in non_binarized_expressions:
             for rule in non_binarized_expressions[expression]:
-                new_prod = "S" + str(counter) #Definir el nombre de la nueva producción
+                new_prod = "Q" + str(counter) #Definir el nombre de la nueva producción
                 old_list = grammar.productions[expression].pop(grammar.productions[expression].index(rule)) #Guardar el valor de la lista antes de binarizar la expresión
                 print("Old", old_list)
                 new_values = old_list[1:]
@@ -175,11 +175,63 @@ def delete_unit_productions(grammar):
 
         if len(unit_productions) == 0:
             is_unit = True
+
+'''
+Busca los símbolos que generan terminales
+'''
+def find_generating_symbols(grammar):
+    generating = set(grammar.terminals)
+    added = True
+
+    while added:
+        added = False
+        for lhs, rules in grammar.productions.items():
+            if lhs not in generating:
+                for rule in rules:
+                    if all(symbol in generating for symbol in rule):
+                        generating.add(lhs)
+                        added = True
+                        break
+    return generating
+'''
+Busca los símbolos alcanzables
+'''
+def find_reachable_symbols(grammar):
+    reachable = set([grammar.initial_symbol])  # Empezar desde el símbolo inicial
+    added = True
+
+    while added:
+        added = False
+        for lhs, rules in grammar.productions.items():
+            if lhs in reachable:
+                for rule in rules:
+                    for symbol in rule:
+                        if symbol not in reachable:
+                            reachable.add(symbol)
+                            added = True
+    return reachable
+
+
+'''
+Elimina símbolos useless
 '''
 
-Estas funciones se encargan de eliminar 
-'''
+def delete_useless(grammar):
+    # Step 1: Remover símbolos que no generan nada
+    generating_symbols = find_generating_symbols(grammar)
+    grammar.productions = {
+        lhs: [rule for rule in rules if all(symbol in generating_symbols for symbol in rule)]
+        for lhs, rules in grammar.productions.items() if lhs in generating_symbols
+    }
+    grammar.non_terminals = [nt for nt in grammar.non_terminals if nt in generating_symbols]
 
+    # Pas 2: remover símbolos inalcanzables
+    reachable_symbols = find_reachable_symbols(grammar)
+    grammar.productions = {
+        lhs: [rule for rule in rules if all(symbol in reachable_symbols for symbol in rule)]
+        for lhs, rules in grammar.productions.items() if lhs in reachable_symbols
+    }
+    grammar.non_terminals = [nt for nt in grammar.non_terminals if nt in reachable_symbols]
 
 
 '''
@@ -200,6 +252,8 @@ def convert_to_cnf(grammar):
     
     #4. Eliminar producciones unitarias
     delete_unit_productions(grammar)
+
+    delete_useless(grammar)
     
 
 
@@ -220,16 +274,10 @@ productions = {
 grammar = Grammar(terminals, non_terminals, initial_symbol, productions)
 
 
-delete_epsilon_productions(grammar)
 
 
-
-print(find_unit_productions(grammar))
-
-binarize_expression(grammar)
-
-delete_unit_productions(grammar)
-
+convert_to_cnf(grammar)
 for i, j in grammar.productions.items():
     print(i, j)
 
+print(grammar.initial_symbol)
