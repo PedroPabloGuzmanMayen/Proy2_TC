@@ -58,7 +58,7 @@ class Grammar:
         execution_time = end_time - start_time  # Calcula el tiempo de ejecución
 
         # Devolver el resultado de aceptación, el parse tree estructurado, y el tiempo de ejecución
-        return ('S' in T[0][n - 1], parse_tree[0][n - 1] if 'S' in T[0][n - 1] else None, execution_time)
+        return (self.initial_symbol in T[0][n - 1], parse_tree[0][n - 1] if self.initial_symbol in T[0][n - 1] else None, execution_time)
 
     def is_valid(self):
         # Verificar si el símbolo inicial está en los no terminales
@@ -71,3 +71,5 @@ class Grammar:
             for lhs, rules in self.productions.items()
         )
         return is_initial_valid and is_productions_valid
+    
+

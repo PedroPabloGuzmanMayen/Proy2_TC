@@ -176,6 +176,8 @@ def delete_unit_productions(grammar):
         if len(unit_productions) == 0:
             is_unit = True
 '''
+
+Estas funciones se encargan de eliminar 
 '''
 
 
