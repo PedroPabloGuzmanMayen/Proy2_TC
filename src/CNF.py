@@ -1,40 +1,27 @@
-from src.Grammar import Grammar
+from Grammar import Grammar
 
 '''
 Esta función debe eliminar el simbolo inicial (solo si es necesario) en las producciones
 '''
 def eliminate_start_symbol(grammar):
-    # Si el simbolo inicial no es un no-terminal, no hacemos nada
-    if grammar.initial_symbol not in grammar.non_terminals:
-        return
-    new_initial_symbol = "S'"
-
-    # Verificar que el nuevo simbolo no exista en los no-terminales
-    while new_initial_symbol in grammar.non_terminals:
-        new_initial_symbol += "'"
-    
-    # Se agrega la nueva produccion para el nuevo simbolo inicial
-    grammar.productions[new_initial_symbol] = [[grammar.initial_symbol]]  # Corrección aquí
-    grammar.initial_symbol = new_initial_symbol  # Corrección en la asignación
-        # Si el símbolo inicial original tenía producciones, transfiérelas al nuevo símbolo inicial
-    if grammar.initial_symbol in grammar.productions:
-        grammar.productions[new_initial_symbol].extend(grammar.productions[grammar.initial_symbol])
-    del grammar.productions[grammar.initial_symbol]
+    new_initial_symbol = "S0"
+    grammar.productions[new_initial_symbol] = [[grammar.initial_symbol]]  # Agregar la producción S0 -> S
+    grammar.initial_symbol = new_initial_symbol  # Cambiar el valor del símbolo inicial de la gramática. 
 
 
 '''
 Esta funcion buscara producciones que puedan derivar en la cadena vacia
 '''
 def find_epsilon_productions(grammar):
-    epsilon_productions = set()
-    # Para cada produccion se verifica si alguna es vacia
-    for lhs, rules in grammar.productions.items():
-        for rhs in rules:
-            if not rhs:
-                epsilon_productions.add(lhs)
+    epsilon_productions = {}
+    for terminal in grammar.productions:
+        for rule in grammar.productions[terminal]:
+            if "ε" in rule:
+                epsilon_productions[terminal] = rule
+                pass
     return epsilon_productions
 '''
-Esta funcion eliminara las producciones que pueden derivar en la cadena vacia
+Esta funcion eliminara las producciones epsilon presentes en la gramática
 '''
 def delete_epsilon_productions(grammar):
     epsilon_productions = find_epsilon_productions(grammar)
@@ -160,3 +147,26 @@ def convert_to_cnf(grammar):
     
     # 4. Asegurarse de que el símbolo inicial esté correctamente configurado
     eliminate_start_symbol(grammar)
+
+
+terminals = ["cooks", "drinks", "eats", "cuts", "in", "with", "he", "she", "cat", "dog", "beer", "cake", "juice", "meat", "soup", "fork", "knife", "oven", "spoon", "a", "the"]
+non_terminals = ["S", "VP", "PP", "NP", "V", "P", "N", "Det"]
+initial_symbol = "S"
+productions = {
+    "S": [["NP", "VP"]],
+    "VP": [["VP", "PP"], ["V", "NP"], ["cooks"], ["drinks"], ["eats"], ["cuts"]],
+    "PP": [["P", "NP"]],
+    "NP": [["Det", "N"], ["he"], ["she"]],
+    "V": [["cooks"], ["drinks"], ["eats"], ["cuts"]],
+    "P": [["in"], ["with"]],
+    "N": [["cat"], ["dog"], ["beer"], ["cake"], ["juice"], ["meat"], ["soup"], ["fork"], ["knife"], ["oven"], ["spoon"]],
+    "Det": [["a"], ["the"], ["ε"]]
+}
+
+grammar = Grammar(terminals, non_terminals, initial_symbol, productions)
+
+for i in grammar.productions:
+    print(i)
+
+
+print(find_epsilon_productions(grammar))
