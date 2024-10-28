@@ -1,6 +1,23 @@
 from Grammar import Grammar
 
 '''
+esta función se encarga de hallar apariciones de una variable en las producciones de la gramática
+'''
+
+def find_appearances(grammar, character):
+    appearances = {}
+    for terminal in grammar.productions:
+        for rule in grammar.productions[terminal]:
+            if character in rule:
+                if character in appearances:
+
+                    appearances[terminal].append(rule)
+                else:
+                    appearances[terminal] = []
+                    appearances[terminal].append(rule)
+    return appearances
+
+'''
 Esta función debe eliminar el simbolo inicial (solo si es necesario) en las producciones
 '''
 def eliminate_start_symbol(grammar):
@@ -16,33 +33,40 @@ def find_epsilon_productions(grammar):
     epsilon_productions = {}
     for terminal in grammar.productions:
         for rule in grammar.productions[terminal]:
-            if "ε" in rule:
+            if "ε" in rule and terminal != grammar.initial_symbol:
                 epsilon_productions[terminal] = rule
-                pass
     return epsilon_productions
 '''
 Esta funcion eliminara las producciones epsilon presentes en la gramática
 '''
 def delete_epsilon_productions(grammar):
     epsilon_productions = find_epsilon_productions(grammar)
+    is_Empty = False #Esta condición nos ayudará a determinar si surgen nuevas producciones epsilon en la gramática
 
-    if not epsilon_productions:
-        return
+    while not is_Empty: 
+        for i in epsilon_productions:
+            print("Prod", i)
+            print(grammar.productions[i])
+            grammar.productions[i].remove(["ε"]) #Remover la producción epsilon
+        for terminal in epsilon_productions:
+            appearances = find_appearances(grammar, terminal) #Hallamos las producciones en donde aparecen los terminales con producciones epsilon
+            print("Appearances: ", appearances) 
+            for variable in appearances:
+                for rule in appearances[variable]:
+                    print("Rule", rule)
+                    if len(rule) >= 2: #Si la regla encontrada tiene una longitud mayor o igual a 2, eliminar la variable y añadir esanueva regla
+                        print("Rule: ", rule)
+                        print(terminal)
+                        new_rule = [symbol for symbol in rule if symbol != str(terminal)]
+                        print("New rule: ", new_rule)
+                        grammar.productions[variable].append(new_rule)
+                    else: #Si la rella tiene longitud 1, guardar la producción epsilon
+                        grammar.productions[variable].append(["ε"])
 
-    new_productions = {}
-
-    for lhs, rules in grammar.productions.items():
-        new_productions[lhs] = []
-        for rhs in rules:
-            new_productions[lhs].append(rhs)
-            # Si el lado izq. puede derivar en epsilo agregamos nuevas producciones
-            if lhs in epsilon_productions:
-                new_rhs = rhs.copy()
-                if new_rhs: # Si la produccion no esta vacia se remueve el simbolo que produce epsilon
-                    new_rhs.remove(lhs)
-                    if new_rhs:
-                        new_productions[lhs].append(new_rhs) # Se agrega si no esta vacia
-    grammar.productions = new_productions
+        epsilon_productions = find_epsilon_productions(grammar) #Evauamos si con los cambios realizados, ahora la gramática ya no tiene producciones epsilon
+        print("NEW", epsilon_productions)
+        if len(list(epsilon_productions)) == 0: #Si ya no hay producciones epsilon, terminar el ciclo
+            is_Empty = True
 '''
 Esta funcion busca que producciones tienen mas de 2 simbolos en el lado der.
 '''
@@ -153,20 +177,21 @@ terminals = ["cooks", "drinks", "eats", "cuts", "in", "with", "he", "she", "cat"
 non_terminals = ["S", "VP", "PP", "NP", "V", "P", "N", "Det"]
 initial_symbol = "S"
 productions = {
-    "S": [["NP", "VP"]],
+    "S": [["NP", "VP"], ["ε"]],
     "VP": [["VP", "PP"], ["V", "NP"], ["cooks"], ["drinks"], ["eats"], ["cuts"]],
-    "PP": [["P", "NP"]],
+    "PP": [["P", "NP"], ["Det"]],
     "NP": [["Det", "N"], ["he"], ["she"]],
     "V": [["cooks"], ["drinks"], ["eats"], ["cuts"]],
     "P": [["in"], ["with"]],
     "N": [["cat"], ["dog"], ["beer"], ["cake"], ["juice"], ["meat"], ["soup"], ["fork"], ["knife"], ["oven"], ["spoon"]],
-    "Det": [["a"], ["the"], ["ε"]]
+    "Det": [["a"], ["the"]]
 }
 
 grammar = Grammar(terminals, non_terminals, initial_symbol, productions)
 
+
+
+delete_epsilon_productions(grammar)
+
 for i in grammar.productions:
-    print(i)
-
-
-print(find_epsilon_productions(grammar))
+    print(grammar.productions[i])
