@@ -73,12 +73,24 @@ def delete_epsilon_productions(grammar):
 Esta funcion busca que producciones tienen mas de 2 simbolos en el lado der.
 '''
 def find_non_binarized_expressions(grammar):
-    non_binarized = []
+    '''
+                    if character in appearances:
+
+                    appearances[terminal].append(rule)
+                else:
+                    appearances[terminal] = []
+                    appearances[terminal].append(rule)
+    '''
+    non_binarized = {}
 
     for lhs, rules in grammar.productions.items():
         for rhs in rules:
             if len(rhs) > 2 :
-                non_binarized.append((lhs,rhs))
+                if lhs in non_binarized:
+                    non_binarized[lhs].append(rhs)
+                else:
+                    non_binarized[lhs] = []
+                    non_binarized[lhs].append(rhs)
     return non_binarized
 
 def replace_terminals(grammar):
@@ -101,23 +113,30 @@ def replace_terminals(grammar):
 '''
 Esta funcion convierte producciones no binarizadas en producciones binarias
 '''
-def binarize_expression(grammar):
-    non_binarized = find_non_binarized_expressions(grammar)
-    new_productions = grammar.productions.copy()  # Copia de las producciones para iterar sin problemas
 
-    for lhs, rules in new_productions.items():
-        updated_rules = []  # Lista temporal para las reglas modificadas de `lhs`
-        for rhs in rules:
-            while len(rhs) > 2:
-                new_non_terminal = f"{lhs}_1"  # Genera un nuevo no-terminal
-                grammar.non_terminals.append(new_non_terminal)
-                
-                # Crea una nueva producción y reemplaza la producción original
-                grammar.productions[new_non_terminal] = [rhs[1:]]
-                rhs = [rhs[0], new_non_terminal]
-                
-            updated_rules.append(rhs)  # Añade la regla binarizada
-        grammar.productions[lhs] = updated_rules  # Actualiza `grammar.productions` con las reglas modificadas
+def binarize_expression(grammar):
+    counter = 0
+    is_binarized = False
+    non_binarized_expressions = find_non_binarized_expressions(grammar) #Obtener las expresiones no binarizada
+    while not is_binarized:
+        for expression in non_binarized_expressions:
+            for rule in non_binarized_expressions[expression]:
+                new_prod = "S" + str(counter) #Definir el nombre de la nueva producción
+                old_list = grammar.productions[expression].pop(grammar.productions[expression].index(rule)) #Guardar el valor de la lista antes de binarizar la expresión
+                print("Old", old_list)
+                new_values = old_list[1:]
+                print("New values: ", new_values)
+                grammar.productions[new_prod] = [new_values]
+                new_list = [old_list[0], new_prod]
+                print(new_list)
+                grammar.productions[expression].append(new_list)
+                counter += 1
+
+        non_binarized_expressions = find_non_binarized_expressions(grammar)
+        
+        if (len(list(non_binarized_expressions))) == 0:
+            is_binarized = True
+
 
 
 '''
@@ -197,7 +216,7 @@ terminals = ["cooks", "drinks", "eats", "cuts", "in", "with", "he", "she", "cat"
 non_terminals = ["S", "VP", "PP", "NP", "V", "P", "N", "Det"]
 initial_symbol = "S"
 productions = {
-    "S": [["NP", "VP"], ["ε"]],
+    "S": [["NP", "VP", "P", "N", "PP", "V"], ["ε"]],
     "VP": [["VP", "PP"], ["V", "NP"], ["cooks"], ["drinks"], ["eats"], ["cuts"], ["cuts", "VP"]],
     "PP": [["P", "NP"], ["Det"]],
     "NP": [["Det", "N"], ["he"], ["she"]],
@@ -211,16 +230,19 @@ grammar = Grammar(terminals, non_terminals, initial_symbol, productions)
 
 print(find_non_binarized_expressions(grammar))
 
-
 delete_epsilon_productions(grammar)
 
 replace_terminals(grammar)
+
+binarize_expression(grammar)
 
 myList = [[1], [2]]
 
 element = myList.pop(myList.index([1]))
 
 print(element)
+
+print(myList[:1])
 
 for i, j in grammar.productions.items():
     print(i, j)
