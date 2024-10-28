@@ -38,7 +38,7 @@ class GrammarApp(ctk.CTk):
         self.output_label = ctk.CTkLabel(self.right_frame, text="Resultado:")
         self.output_label.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
-        self.output_text = ctk.CTkTextbox(self.right_frame, width=450, height=200)
+        self.output_text = ctk.CTkTextbox(self.right_frame, width=450, height=500)
         self.output_text.grid(row=1, column=0, padx=10, pady=10)
 
         self.columnconfigure(1, weight=1)
@@ -59,12 +59,12 @@ class GrammarApp(ctk.CTk):
         self.right_frame.configure(fg_color=self.colors["surface1"])
         self.theme_button.configure(fg_color=self.colors["overlay1"], text_color=self.colors["crust"])
         self.label.configure(text_color=self.colors["text"])
-        self.input_label.configure(text_color=self.colors["text"])
-        self.input_entry.configure(fg_color=self.colors["surface0"], text_color=self.colors["crust"])
+        self.input_label.configure(text_color=self.colors["subtext1"])
+        self.input_entry.configure(fg_color=self.colors["surface0"], text_color=self.colors["subtext1"])
         self.cnf_button.configure(fg_color=self.colors["sapphire"], text_color=self.colors["crust"])
         self.cyk_button.configure(fg_color=self.colors["lavender"], text_color=self.colors["crust"])
-        self.output_label.configure(text_color=self.colors["crust"])
-        self.output_text.configure(fg_color=self.colors["surface0"], text_color=self.colors["crust"])
+        self.output_label.configure(text_color=self.colors["subtext0"])
+        self.output_text.configure(fg_color=self.colors["surface0"], text_color=self.colors["subtext1"])
         self.update_idletasks() 
 
     def toggle_theme(self):
