@@ -5,9 +5,9 @@ Esta función debe eliminar el simbolo inicial (solo si es necesario) en las pro
 '''
 def eliminate_start_symbol(grammar):
     new_initial_symbol = "S0"
-
     grammar.productions[new_initial_symbol] = [[grammar.initial_symbol]]  # Agregar la producción S0 -> S
     grammar.initial_symbol = new_initial_symbol  # Cambiar el valor del símbolo inicial de la gramática. 
+
 
 '''
 Esta funcion buscara producciones que puedan derivar en la cadena vacia

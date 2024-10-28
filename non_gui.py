@@ -1,38 +1,56 @@
-from src.CNF import convert_to_cnf
 from src.Grammar import Grammar
+from src.CNF import convert_to_cnf
 
-# Define la gramática
-terminals = ["cooks", "drinks", "eats", "cuts", "in", "with", "he", "she", "cat", "dog", "beer", "cake", "juice", "meat", "soup", "fork", "knife", "oven", "spoon", "a", "the"]
-non_terminals = ["S", "VP", "PP", "NP", "V", "P", "N", "Det"]
-initial_symbol = "S"
-productions = {
-    "S": [["NP", "VP"]],
-    "VP": [["VP", "PP"], ["V", "NP"], ["cooks"], ["drinks"], ["eats"], ["cuts"]],
-    "PP": [["P", "NP"]],
-    "NP": [["Det", "N"], ["he"], ["she"]],
-    "V": [["cooks"], ["drinks"], ["eats"], ["cuts"]],
-    "P": [["in"], ["with"]],
-    "N": [["cat"], ["dog"], ["beer"], ["cake"], ["juice"], ["meat"], ["soup"], ["fork"], ["knife"], ["oven"], ["spoon"]],
-    "Det": [["a"], ["the"]]
-}
+def get_user_input():
+    # Obtener terminales
+    terminals = input("Ingrese los terminales, separados por comas (ej: a,b,c): ").strip().split(',')
 
-# Crea la gramática y conviértela a CNF
-grammar = Grammar(terminals, non_terminals, initial_symbol, productions)
-convert_to_cnf(grammar)  # Convierte la gramática a CNF
+    # Obtener no terminales
+    non_terminals = input("Ingrese los no terminales, separados por comas (ej: S,A,B): ").strip().split(',')
 
-# Pruebas de frases aceptadas y no aceptadas
-phrases = [
-    ("he eats a cake", True),  # Debería ser aceptada
-    ("the dog drinks the juice", True),  # Debería ser aceptada
-    ("she cake drinks", False),  # No debería ser aceptada
-    ("cat a the", False)  # No debería ser aceptada
-]
+    # Obtener símbolo inicial
+    initial_symbol = input("Ingrese el símbolo inicial (ej: S): ").strip()
 
-# Ejecuta el algoritmo CYK en cada frase
-for phrase, expected in phrases:
-    input_string = phrase.split()
-    result, tree, exec_time = grammar.cyk_parse(input_string)
-    print(f"Phrase: '{phrase}' - Expected: {'Accepted' if expected else 'Rejected'}, Result: {'Accepted' if result else 'Rejected'}")
-    if result:
-        print("Parse Tree:", tree)
-    print(f"Execution Time: {exec_time:.6f} seconds\n")
+    # Obtener producciones
+    productions = {}
+    print("Ingrese las producciones. Use '->' para indicar la producción y '|' para separar alternativas.")
+    print("Formato: S -> A B | a")
+    print("Para finalizar, presione Enter sin ingresar nada.")
+    while True:
+        production_input = input("Producción: ").strip()
+        if not production_input:
+            break
+        try:
+            lhs, rhs = production_input.split("->")
+            lhs = lhs.strip()
+            rhs = [r.strip().split() for r in rhs.split("|")]
+            productions[lhs] = rhs
+        except ValueError:
+            print("Formato incorrecto. Intente de nuevo.")
+
+    return terminals, non_terminals, initial_symbol, productions
+
+def main():
+    # Solicitar datos de la gramática al usuario
+    terminals, non_terminals, initial_symbol, productions = get_user_input()
+
+    # Crear la gramática y convertirla a CNF
+    grammar = Grammar(terminals, non_terminals, initial_symbol, productions)
+    convert_to_cnf(grammar)
+
+    # Mostrar la gramática en CNF
+    print("\nGramática en Forma Normal de Chomsky (CNF):")
+    print(grammar.to_json())
+
+    # Solicitar cadena para análisis CYK
+    input_string = input("\nIngrese la cadena a analizar (separada por espacios, ej: a b c): ").strip().split()
+
+    # Ejecutar el algoritmo CYK y mostrar resultados
+    accepted, parse_tree, exec_time = grammar.cyk_parse(input_string)
+    print(f"\nResultado del análisis CYK para la cadena '{' '.join(input_string)}':")
+    print("Cadena aceptada." if accepted else "Cadena rechazada.")
+    print(f"Tiempo de ejecución: {exec_time:.6f} segundos")
+    if accepted:
+        print("Parse Tree:", parse_tree)
+
+main()
