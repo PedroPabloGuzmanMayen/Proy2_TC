@@ -28,9 +28,10 @@ class Grammar:
         )
 
     def cyk_parse(self, input_string):
+        input = input_string.strip().split()
         start_time = time.time()  # Inicia la medición de tiempo
 
-        n = len(input_string)
+        n = len(input)
         T = [[set() for _ in range(n)] for _ in range(n)]
         parse_tree = [[[] for _ in range(n)] for _ in range(n)]
 
@@ -38,9 +39,9 @@ class Grammar:
         for j in range(n):
             for lhs, rules in self.productions.items():
                 for rhs in rules:
-                    if len(rhs) == 1 and rhs[0] == input_string[j]:
+                    if len(rhs) == 1 and rhs[0] == input[j]:
                         T[j][j].add(lhs)
-                        parse_tree[j][j].append((lhs, input_string[j]))  # Estructura del nodo terminal
+                        parse_tree[j][j].append((lhs, input[j]))  # Estructura del nodo terminal
 
         # Fase 2: Llenar el resto de la tabla con combinaciones de subcadenas
         for length in range(2, n + 1):
@@ -73,3 +74,20 @@ class Grammar:
         return is_initial_valid and is_productions_valid
     
 
+terminals = ["cooks", "drinks", "eats", "cuts", "in", "with", "he", "she", "cat", "dog", "beer", "cake", "juice", "meat", "soup", "fork", "knife", "oven", "spoon", "a", "the"]
+non_terminals = ["S", "VP", "PP", "NP", "V", "P", "N", "Det"]
+initial_symbol = "S"
+productions = {
+    "S": [["NP", "VP"]],
+    "VP": [["VP", "PP"], ["V", "NP"], ["cooks"], ["drinks"], ["eats"], ["cuts"]],
+    "PP": [["P", "NP"]],
+    "NP": [["Det", "N"], ["he"], ["she"]],
+    "V": [["cooks"], ["drinks"], ["eats"], ["cuts"]],
+    "P": [["in"], ["with"]],
+    "N": [["cat"], ["dog"], ["beer"], ["cake"], ["juice"], ["meat"], ["soup"], ["fork"], ["knife"], ["oven"], ["spoon"]],
+    "Det": [["a"], ["the"]]
+}
+
+grammar = Grammar(terminals, non_terminals, initial_symbol, productions)
+
+print(grammar.cyk_parse('he with the beer cake oven'))

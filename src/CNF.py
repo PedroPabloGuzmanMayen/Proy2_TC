@@ -188,17 +188,19 @@ Esta función aplica todos los pasos necesarios para convertir la gramática a C
 '''
 
 def convert_to_cnf(grammar):
-    # 1. Eliminar producciones vacías
+
+    # 1. Cambiar el símbolo inicial
+    eliminate_start_symbol(grammar)
+
+    # 2. Binarizar la expresión
+    binarize_expression(grammar)
+
+    #3. Eliminar producciones epsilon
     delete_epsilon_productions(grammar)
     
-    # 2. Eliminar producciones unitarias
+    #4. Eliminar producciones unitarias
     delete_unit_productions(grammar)
     
-    # 3. Binarizar producciones
-    binarize_expression(grammar)
-    
-    # 4. Asegurarse de que el símbolo inicial esté correctamente configurado
-    eliminate_start_symbol(grammar)
 
 
 terminals = ["cooks", "drinks", "eats", "cuts", "in", "with", "he", "she", "cat", "dog", "beer", "cake", "juice", "meat", "soup", "fork", "knife", "oven", "spoon", "a", "the"]
