@@ -16,6 +16,11 @@ def eliminate_start_symbol(grammar):
     # Se agrega la nueva produccion para el nuevo simbolo inicial
     grammar.productions[new_initial_symbol] = [[grammar.initial_symbol]]  # Corrección aquí
     grammar.initial_symbol = new_initial_symbol  # Corrección en la asignación
+        # Si el símbolo inicial original tenía producciones, transfiérelas al nuevo símbolo inicial
+    if grammar.initial_symbol in grammar.productions:
+        grammar.productions[new_initial_symbol].extend(grammar.productions[grammar.initial_symbol])
+    del grammar.productions[grammar.initial_symbol]
+
 
 '''
 Esta funcion buscara producciones que puedan derivar en la cadena vacia
