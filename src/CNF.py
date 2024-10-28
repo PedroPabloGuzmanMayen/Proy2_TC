@@ -115,6 +115,7 @@ Esta funcion convierte producciones no binarizadas en producciones binarias
 '''
 
 def binarize_expression(grammar):
+    replace_terminals(grammar)
     counter = 0
     is_binarized = False
     non_binarized_expressions = find_non_binarized_expressions(grammar) #Obtener las expresiones no binarizada
@@ -140,58 +141,44 @@ def binarize_expression(grammar):
 
 
 '''
-1. find_null_productions y delete_null_productions
-Estas funciones encuentran y eliminan producciones que derivan en la cadena vacía (ε), lo cual es necesario para la conversión a CNF.
-'''
-def find_null_productions(grammar):
-    epsilon_productions = set()
-    for lhs, rules in grammar.productions.items():
-        for rhs in rules:
-            if not rhs:  # Si la producción es una cadena vacía
-                epsilon_productions.add(lhs)
-    return epsilon_productions
-
-def delete_null_productions(grammar):
-    epsilon_productions = find_null_productions(grammar)
-    if not epsilon_productions:
-        return
-
-    new_productions = {}
-    for lhs, rules in grammar.productions.items():
-        new_productions[lhs] = []
-        for rhs in rules:
-            if rhs:  # No es una producción vacía
-                new_productions[lhs].append(rhs)
-                for symbol in epsilon_productions:
-                    if symbol in rhs:
-                        # Crear una nueva producción sin el símbolo que produce ε
-                        new_rhs = [s for s in rhs if s != symbol]
-                        if new_rhs:
-                            new_productions[lhs].append(new_rhs)
-    grammar.productions = new_productions
-
-'''
 2. find_unit_productions y delete_unit_productions
 Estas funciones buscan producciones unitarias y las eliminan, sustituyéndolas por producciones equivalentes.
 '''
 def find_unit_productions(grammar):
-    unit_productions = []
+    unit_productions = {}
     for lhs, rules in grammar.productions.items():
         for rhs in rules:
             if len(rhs) == 1 and rhs[0] in grammar.non_terminals:
-                unit_productions.append((lhs, rhs[0]))
+                if lhs in unit_productions:
+                    unit_productions[lhs].append(rhs)
+                else:
+                    unit_productions[lhs] = []
+                    unit_productions[lhs].append(rhs)
     return unit_productions
 
+'''
+Elimina las producciones unitarias
+'''
 def delete_unit_productions(grammar):
     unit_productions = find_unit_productions(grammar)
-    while unit_productions:
-        lhs, rhs = unit_productions.pop()
-        # Remplazar la producción unitaria con producciones del RHS
-        for production in grammar.productions[rhs]:
-            if production not in grammar.productions[lhs]:
-                grammar.productions[lhs].append(production)
-        # Actualizar lista de producciones unitarias
-        unit_productions = find_unit_productions(grammar)
+    print("initial unit prods", unit_productions)
+    is_unit = False #Verifica si hay nuevas transiciones unitarias
+    while not is_unit:
+        for prod, rule in unit_productions.items():
+            for production in rule:
+                old_value = grammar.productions[prod].pop(grammar.productions[prod].index(production)) #Eliminar la producción unitaria
+                print("Old vale: ", old_value)
+                new_values = grammar.productions[prod]
+                grammar.productions[prod] = grammar.productions[prod] + grammar.productions[old_value[0]] #Añadir las nuevas transiciones
+
+        unit_productions = find_unit_productions(grammar) #Verificar si hay más transiciones unitarias
+
+        if len(unit_productions) == 0:
+            is_unit = True
+'''
+'''
+
+
 
 '''
 3. convert_to_cnf
@@ -223,26 +210,21 @@ productions = {
     "V": [["cooks", "drinks"], ["drinks"], ["eats"], ["cuts"]],
     "P": [["in"], ["with"]],
     "N": [["cat"], ["dog"], ["beer"], ["cake"], ["juice"], ["meat"], ["soup"], ["fork"], ["knife"], ["oven"], ["spoon"]],
-    "Det": [["a"], ["the"]]
+    "Det": [["a"], ["the"], ["VP"]]
 }
 
 grammar = Grammar(terminals, non_terminals, initial_symbol, productions)
 
-print(find_non_binarized_expressions(grammar))
 
 delete_epsilon_productions(grammar)
 
-replace_terminals(grammar)
+
+
+print(find_unit_productions(grammar))
 
 binarize_expression(grammar)
 
-myList = [[1], [2]]
-
-element = myList.pop(myList.index([1]))
-
-print(element)
-
-print(myList[:1])
+delete_unit_productions(grammar)
 
 for i, j in grammar.productions.items():
     print(i, j)
